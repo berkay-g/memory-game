@@ -144,8 +144,8 @@ void test(double time_interval, int level)
     }
 }
 
-inline void fillVectorRandom(std::vector<int> &vec)
-{   
+void fillVectorRandom(std::vector<int> &vec)
+{
     vec.clear();
     // Seed the random number generator
     std::random_device rd;
@@ -153,9 +153,11 @@ inline void fillVectorRandom(std::vector<int> &vec)
     std::uniform_int_distribution<> dis(0, 3);
 
     // Generate all four numbers at least once
-    for (int i = 0; i < 4; ++i) {
+    for (int i = 0; i < 4; ++i)
+    {
         int randomNumber;
-        do {
+        do
+        {
             randomNumber = dis(gen);
         } while (std::find(vec.begin(), vec.end(), randomNumber) != vec.end());
         vec.push_back(randomNumber);
@@ -163,11 +165,13 @@ inline void fillVectorRandom(std::vector<int> &vec)
 
     // Fill the rest of the vector with the logic to avoid three consecutive repetitions
     const int desiredSize = 10; // Adjust as needed
-    for (int i = vec.size(); i < desiredSize; ++i) {
+    for (size_t i = vec.size(); i < desiredSize; ++i)
+    {
         int randomNumber;
         int lastNumber = vec.back();
         int secondLastNumber = vec[vec.size() - 2];
-        do {
+        do
+        {
             randomNumber = dis(gen);
         } while (randomNumber == lastNumber && randomNumber == secondLastNumber);
         vec.push_back(randomNumber);
@@ -279,7 +283,7 @@ void draw(App *app)
     }
     ImGui::End();
 
-    app->DrawString(std::to_string(level), {360, 0}, 200, {255, 255, 255, 255}, 1);
+    app->DrawString(std::to_string(level), {360, 0}, 200, {turn ? 255.f : 0.f, turn ? 255.f : 0.f, turn ? 255.f : 0.f, 255}, 1);
 
     filledCircleRGBA(renderer, 200, 200, 200, 20, 20, 20, 255);
 
@@ -341,7 +345,7 @@ int EventFilter(void *userdata, SDL_Event *event)
 
 int main()
 {
-    App app("App", 400, 400, SDL_WINDOW_RESIZABLE, SDL_RENDERER_SOFTWARE, SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+    App app("App", 400, 400, SDL_WINDOW_RESIZABLE, SDL_RENDERER_ACCELERATED, SDL_INIT_VIDEO | SDL_INIT_AUDIO);
     app.SetWindowMinimumSize(400, 400);
     SDL_SetEventFilter(EventFilter, &app);
 
@@ -377,13 +381,43 @@ int main()
                 if (event.key.keysym.sym == SDLK_ESCAPE)
                     quit = 1;
 
-                if (event.key.keysym.sym == SDLK_k)
+                else if (event.key.keysym.sym == SDLK_k)
                     SDL_Log("fps = %lf", 1 / deltaTime);
 
-                if (event.key.keysym.sym == SDLK_v)
+                else if (event.key.keysym.sym == SDLK_v)
                 {
                 }
 
+                else if (event.key.keysym.sym == SDLK_SPACE)
+                {
+                    pause = false;
+                    SDL_SetWindowTitle(app.GetSDLWindow(), "App");
+                }
+
+                if (!turn || wait)
+                    break;
+
+                if (event.key.keysym.sym == SDLK_q)
+                {
+                    guess.push_back(0);
+                    lit[0] = true;
+                }
+                else if (event.key.keysym.sym == SDLK_w)
+                {
+                    guess.push_back(1);
+                    lit[1] = true;
+                }
+                else if (event.key.keysym.sym == SDLK_a)
+                {
+                    guess.push_back(2);
+                    lit[2] = true;
+                }
+                else if (event.key.keysym.sym == SDLK_s)
+                {
+                    guess.push_back(3);
+                    lit[3] = true;
+                }
+                
                 break;
             // case SDL_EVENT_MOUSE_BUTTON_UP:
             //     break;
