@@ -4,16 +4,22 @@
 #include "SDL2_framerate.h"
 #include "SDL2_gfxPrimitives.h"
 
+#define MINIAUDIO_IMPLEMENTATION
+#include "miniaudio.h"
+
 #include <vector>
 #include <algorithm>
 #include <random>
 
-struct Pie
+ma_result result;
+ma_engine engine;
+
+struct pie
 {
     Sint16 x, y, radius, start_angle, end_angle;
 
-    Pie(){};
-    Pie(Sint16 x, Sint16 y, Sint16 radius, Sint16 start_angle, Sint16 end_angle)
+    pie(){};
+    pie(Sint16 x, Sint16 y, Sint16 radius, Sint16 start_angle, Sint16 end_angle)
         : x(x), y(y), radius(radius), start_angle(start_angle), end_angle(end_angle)
     {
     }
@@ -29,7 +35,7 @@ struct Pie
     }
 };
 
-constexpr bool IsMouseInsidePie(float mouse_x, float mouse_y, const Pie &pie)
+constexpr bool IsMouseInsidePie(float mouse_x, float mouse_y, const pie &pie)
 {
     // Calculate distance from mouse to pie center
     float dx = mouse_x - pie.x;
@@ -86,6 +92,8 @@ constexpr bool IsMouseInsideThickLine(float mouse_x, float mouse_y, float x1, fl
 }
 
 bool states[4] = {0};
+bool states_prev[4] = {0};
+
 void setPieState(bool states[4], int index)
 {
     for (int i = 0; i < 4; i++)
@@ -95,15 +103,15 @@ void setPieState(bool states[4], int index)
         states[index] = true;
 }
 
-Pie yellow(200, 200, 190, 180, 270);
-Pie blue(200, 200, 190, 270, 360);
-Pie red(200, 200, 190, 90, 180);
-Pie green(200, 200, 190, 0, 90);
+pie yellow(200, 200, 190, 180, 270);
+pie blue(200, 200, 190, 270, 360);
+pie red(200, 200, 190, 90, 180);
+pie green(200, 200, 190, 0, 90);
 
-Pie black(200, 200, 80, 0, 359);
-Pie gray(200, 200, 70, 0, 359);
+pie black(200, 200, 80, 0, 359);
+pie gray(200, 200, 70, 0, 359);
 
-constexpr bool IsMouseInsideButton(float mouse_x, float mouse_y, const Pie &pie)
+constexpr bool IsMouseInsideButton(float mouse_x, float mouse_y, const pie &pie)
 {
     if (IsMouseInsidePie(mouse_x, mouse_y, pie) &&
         !IsMouseInsideThickLine(mouse_x, mouse_y, 0, 200, 400, 200, 10) &&
@@ -123,6 +131,9 @@ std::vector<int> numbers(10);
 
 double count = 0;
 int index = 0;
+
+bool play = false;
+std::string sound;
 
 void test(double time_interval, int level)
 {
@@ -190,8 +201,8 @@ double wait_counter = 0.0;
 
 bool lit[4] = {0};
 double lit_counter[4] = {0};
-void cheat();
 
+void cheat();
 void reset()
 {
     pause = true;
@@ -204,6 +215,8 @@ void reset()
     guess.clear();
     cheat();
 }
+
+bool prev_states[4] = {0};
 
 void draw(App *app)
 {
@@ -219,6 +232,27 @@ void draw(App *app)
         wait_counter -= 1.2;
         wait = false;
         turn = false;
+    }
+
+    for (int i = 0; i < 4; i++)
+    {
+        if (states[i] && states[i] != prev_states[i])
+        {
+            sound = std::to_string(i + 1);
+            play = true;
+            prev_states[i] = states[i];
+        }
+    }
+    for (int i = 0; i < 4; i++)
+    {
+        prev_states[i] = states[i];
+    }
+
+    if (play)
+    {
+        ma_engine_play_sound(&engine, std::string(sound + ".wav").c_str(), NULL);
+
+        play = false;
     }
 
     for (int i = 0; i < 4; i++)
@@ -345,7 +379,7 @@ int EventFilter(void *userdata, SDL_Event *event)
 
 int main()
 {
-    App app("App", 400, 400, SDL_WINDOW_RESIZABLE, SDL_RENDERER_ACCELERATED, SDL_INIT_VIDEO | SDL_INIT_AUDIO);
+    App app("App", 400, 400, SDL_WINDOW_RESIZABLE, SDL_RENDERER_SOFTWARE, SDL_INIT_VIDEO);
     app.SetWindowMinimumSize(400, 400);
     SDL_SetEventFilter(EventFilter, &app);
 
@@ -353,6 +387,12 @@ int main()
 
     fillVectorRandom(numbers);
     cheat();
+
+    result = ma_engine_init(NULL, &engine);
+    if (result != MA_SUCCESS)
+    {
+        return -1;
+    }
 
     FPSmanager fps;
     SDL_initFramerate(&fps);
@@ -417,7 +457,7 @@ int main()
                     guess.push_back(3);
                     lit[3] = true;
                 }
-                
+
                 break;
             // case SDL_EVENT_MOUSE_BUTTON_UP:
             //     break;
@@ -466,5 +506,6 @@ int main()
         SDL_framerateDelay(&fps);
     }
 
+    ma_engine_uninit(&engine);
     return 0;
 }
