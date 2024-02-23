@@ -143,7 +143,7 @@ void update()
   }
 
 
-  if (guesses.size() == 9)
+  if (level == 10)
   {
     windowTitle("You Won!");
     reset();
