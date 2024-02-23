@@ -172,6 +172,11 @@ void update()
     {
       windowTitle("Memory Game");
       pause = false;
+    } else if (key == 'v')
+    {
+      for (int i = 0; i < 10; i++)
+        print(numbers[i] + " ");
+      print('\n');
     }
     if (turn && !wait)
     {
@@ -191,15 +196,9 @@ void update()
       {
         lit[3] = true;
         guesses.append(3);
-      } else if (key == 'v')
-      {
-        for (int i = 0; i < 10; i++)
-          print(numbers[i] + " ");
-        print('\n');
       }
     }
   }
-
 
   for (int i = 0; i < 4; i++)
   {
