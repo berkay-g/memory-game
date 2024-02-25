@@ -19,7 +19,7 @@ int EventFilter(void *userdata, SDL_Event *event)
 
 int main()
 {
-    App app("memory", 640, 360, SDL_WINDOW_RESIZABLE, SDL_RENDERER_SOFTWARE, SDL_INIT_VIDEO);
+    App app("memory", 640, 360, SDL_WINDOW_RESIZABLE, SDL_RENDERER_ACCELERATED, SDL_INIT_VIDEO);
     app.SetWindowMinimumSize(640, 360);
     SDL_SetEventFilter(EventFilter, &app);
 
