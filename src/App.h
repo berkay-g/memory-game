@@ -48,6 +48,10 @@ public:
     void DrawString(const std::string &str, const ImVec2 &position, float size, const ImVec4 &color, int discriminator);
 #endif
 
+    void Setup();
+    void Update(SDL_Event& event, bool& quit, float deltaTime);
+    void Draw();
+
     const bool IsMouseInsideRect(float mouseX, float mouseY, const SDL_FRect &rect);
 private:
     SDL_Window *window{};
