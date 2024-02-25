@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.14)
-project(a)
+project(memory)
 
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
@@ -27,6 +27,6 @@ target_link_libraries(${PROJECT_NAME} ${CMAKE_SOURCE_DIR}/lib/SDL3-static.lib wi
 if (MSVC)
 	message("MSVC")
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS)
-	# target_link_options(${PROJECT_NAME} PUBLIC "/SUBSYSTEM:WINDOWS")
-	# target_link_options(${PROJECT_NAME} PUBLIC "/ENTRY:mainCRTStartup")
+	target_link_options(${PROJECT_NAME} PUBLIC "/SUBSYSTEM:WINDOWS")
+	target_link_options(${PROJECT_NAME} PUBLIC "/ENTRY:mainCRTStartup")
 endif()

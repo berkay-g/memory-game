@@ -194,7 +194,7 @@ void fillVectorRandom(std::vector<int> &vec)
 
 std::vector<int> guess;
 int level = 0;
-double time_interval = 1.0;
+double time_interval = 0.8;
 
 bool wait = false;
 double wait_counter = 0.0;
@@ -209,7 +209,7 @@ void reset()
     count = 0;
     index = 0;
     turn = false;
-    time_interval = 1.0;
+    time_interval = 0.8;
     level = 0;
     fillVectorRandom(numbers);
     guess.clear();
@@ -259,9 +259,9 @@ void draw(App *app)
     {
         if (lit[i])
             lit_counter[i] += deltaTime;
-        if (lit_counter[i] >= 0.25)
+        if (lit_counter[i] >= 0.20)
         {
-            lit_counter[i] -= 0.25;
+            lit_counter[i] -= 0.20;
             lit[i] = false;
         }
     }
@@ -321,10 +321,10 @@ void draw(App *app)
 
     filledCircleRGBA(renderer, 200, 200, 200, 20, 20, 20, 255);
 
-    yellow.draw(renderer, 255, 255, 0, states[0] ? 255 : 50);
-    blue.draw(renderer, 30, 50, 255, states[1] ? 255 : 50);
-    red.draw(renderer, 255, 0, 0, states[2] ? 255 : 50);
-    green.draw(renderer, 0, 255, 0, states[3] ? 255 : 50);
+    yellow.draw(renderer, 255, 255, 0, states[0] ? 255 : 100);
+    blue.draw(renderer, 0, 0, 255, states[1] ? 255 : 100);
+    red.draw(renderer, 255, 0, 0, states[2] ? 255 : 100);
+    green.draw(renderer, 0, 255, 0, states[3] ? 255 : 100);
 
     black.draw(renderer, 20, 20, 20, 255);
     thickLineRGBA(renderer, 0, 200, 400, 200, 10, 20, 20, 20, 255);
