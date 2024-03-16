@@ -39,6 +39,26 @@ boolean play = false;
 boolean overStart = false;
 boolean overReset = false;
 
+Wait victory_wait = new Wait(0.35f);
+int[] victory_song = { 0, 1, 2, 3, 2, 1, 0, 3, 2 };
+int victory_index = 0;
+void victory()
+{
+  setState(states, victory_song[victory_index]);
+  if (victory_wait.Update(deltaTime))
+  {
+    victory_index++;
+    setState(states, -1);
+    if (victory_index >= victory_song.length)
+    {
+      victory_index = 0;
+      victory_wait.start = false;
+    }
+    else
+      victory_wait.start = true;
+  }
+}
+
 void setup() {
   size(640, 360);
   noStroke();
@@ -55,7 +75,6 @@ void setup() {
   
   fireworks_gif = new Gif(this, "data/fireworks.gif");
   fireworks_gif.ignoreRepeat();
-
 }
 
 void draw() {
@@ -64,6 +83,9 @@ void draw() {
 
   updateButtons();
   update();
+  
+  if (victory_wait.start)
+    victory();
 
   background(#161616);
   
@@ -169,6 +191,7 @@ void update()
     windowTitle("You Won!");
     reset();
     fireworks_gif.play();
+    victory_wait.start = true;
   }
 
   for (int i = 0; i < 4; i++)
