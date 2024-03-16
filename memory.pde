@@ -1,6 +1,9 @@
 import processing.sound.*;
 SoundFile[] music = new SoundFile[4];
 
+Wait wait_end_turn = new Wait(1.2f);
+Wait lit[] = new Wait[4];
+
 int X = 360;
 int Y = 180;
 int SIZE = 300;
@@ -22,13 +25,7 @@ int level = 0;
 boolean turn = false;
 boolean pause = true;
 
-boolean wait = false;
-double wait_counter = 0.0;
-
 double time_interval = 0.8;
-
-boolean[] lit = { false, false, false, false };
-double[] lit_counter = { 0, 0, 0, 0 };
 
 boolean key_hold = false;
 
@@ -42,16 +39,14 @@ void setup() {
   size(640, 360);
   noStroke();
   f = createFont("Arial", 16, true);
-
-  music[0] = new SoundFile(this, "data/1.wav");
-  music[1] = new SoundFile(this, "data/2.wav");
-  music[2] = new SoundFile(this, "data/3.wav");
-  music[3] = new SoundFile(this, "data/4.wav");
+  
+  for (int i = 0; i < 4; i++)
+  {
+    lit[i] = new Wait(0.20f);
+    music[i] = new SoundFile(this, "data/" + (i + 1) + ".wav");
+  }
 
   fillNumbers(numbers);
-  for (int i = 0; i < 10; i++)
-    print(numbers[i] + " ");
-  print('\n');
 }
 
 void draw() {
@@ -72,9 +67,9 @@ void draw() {
   arc(X, Y, SIZE, SIZE, 0, HALF_PI);
 
   fill(overStart ? #08aaf9 : #282828);
-  rect(30, 100, 120, 30, 10);
+  rect(30, 100, 120, 30, 8);
   fill(overReset ? #08aaf9 : #282828);
-  rect(30, 150, 120, 30, 10);
+  rect(30, 150, 120, 30, 8);
 
   textFont(f, 20);
   fill(255);
@@ -87,40 +82,11 @@ void draw() {
   text("Reset", 67, 171);
 }
 
-void mousePressed() {
-  if (overStart) {
-    windowTitle("Memory Game");
-    pause = false;
-  }
-  if (overReset) {
-    windowTitle("Memory Game");
-    reset();
-  }
-}
-
-void updateButtons()
-{
-  if ( overRect(30, 100, 120, 30) ) {
-    overStart = true;
-    overReset = false;
-  } else if ( overRect(30, 150, 120, 30) ) {
-    overReset = true;
-    overStart = false;
-  } else {
-    overReset = overStart = false;
-  }
-}
-
 void update()
 {
-  if (wait)
-    wait_counter += deltaTime;
-  if (wait_counter >= 1.2)
-  {
-    wait_counter -= 1.2;
-    wait = false;
+
+  if (wait_end_turn.Update(deltaTime))
     turn = false;
-  }
 
   for (int i = 0; i < guesses.size(); i++)
   {
@@ -134,7 +100,7 @@ void update()
     if (i == level)
     {
       guesses.clear();
-      wait = true;
+      wait_end_turn.start = true;
       setState(states, -1);
       level++;
       time_interval -= 0.05;
@@ -164,6 +130,7 @@ void update()
     windowTitle("You Won!");
     reset();
   }
+  
 
   if (keyPressed && !key_hold)
   {
@@ -178,23 +145,23 @@ void update()
         print(numbers[i] + " ");
       print('\n');
     }
-    if (turn && !wait)
+    if (turn && !wait_end_turn.start)
     {
       if (key == 'q' || key == 'Q')
       {
-        lit[0] = true;
+        lit[0].start = true;
         guesses.append(0);
       } else if (key == 'w' || key == 'W')
       {
-        lit[1] = true;
+        lit[1].start = true;
         guesses.append(1);
       } else if (key == 'a' || key == 'A')
       {
-        lit[2] = true;
+        lit[2].start = true;
         guesses.append(2);
       } else if (key == 's' || key == 'S')
       {
-        lit[3] = true;
+        lit[3].start = true;
         guesses.append(3);
       }
     }
@@ -202,18 +169,12 @@ void update()
 
   for (int i = 0; i < 4; i++)
   {
-    if (lit[i])
-      lit_counter[i] += deltaTime;
-    if (lit_counter[i] >= 0.20)
-    {
-      lit_counter[i] -= 0.20;
-      lit[i] = false;
-    }
+    lit[i].Update(deltaTime);
   }
 
   for (int i = 0; i < 4; i++)
   {
-    if (lit[i])
+    if (lit[i].start)
     {
       states[i] = true;
     } else
@@ -230,15 +191,15 @@ void fillNumbers(int[] numbers)
     numbers[i] = (int)random(0, 4);
 }
 
-void setState(boolean[] states, int idx)
+void setState(boolean[] states, int index)
 {
   for (int i = 0; i < 4; i++)
   {
     states[i] = false;
   }
-  if (idx == -1)
+  if (index == -1)
     return;
-  states[idx] = true;
+  states[index] = true;
 }
 
 
@@ -278,6 +239,30 @@ boolean overRect(int x, int y, int width, int height) {
     return true;
   } else {
     return false;
+  }
+}
+
+void updateButtons()
+{
+  if ( overRect(30, 100, 120, 30) ) {
+    overStart = true;
+    overReset = false;
+  } else if ( overRect(30, 150, 120, 30) ) {
+    overReset = true;
+    overStart = false;
+  } else {
+    overReset = overStart = false;
+  }
+}
+
+void mousePressed() {
+  if (overStart) {
+    windowTitle("Memory Game");
+    pause = false;
+  }
+  if (overReset) {
+    windowTitle("Memory Game");
+    reset();
   }
 }
 
