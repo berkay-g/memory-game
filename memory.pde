@@ -27,7 +27,7 @@ boolean pause = true;
 
 double time_interval = 0.8;
 
-boolean key_hold = false;
+boolean[] keyPressedArray = new boolean[256]; // Array to store the state of each key
 
 int sound;
 boolean play = false;
@@ -39,7 +39,7 @@ void setup() {
   size(640, 360);
   noStroke();
   f = createFont("Arial", 16, true);
-  
+
   for (int i = 0; i < 4; i++)
   {
     lit[i] = new Wait(0.20f);
@@ -130,56 +130,12 @@ void update()
     windowTitle("You Won!");
     reset();
   }
-  
-
-  if (keyPressed && !key_hold)
-  {
-    key_hold = true;
-    if (key == ' ')
-    {
-      windowTitle("Memory Game");
-      pause = false;
-    } else if (key == 'v')
-    {
-      for (int i = 0; i < 10; i++)
-        print(numbers[i] + " ");
-      print('\n');
-    }
-    if (turn && !wait_end_turn.start)
-    {
-      if (key == 'q' || key == 'Q')
-      {
-        lit[0].start = true;
-        guesses.append(0);
-      } else if (key == 'w' || key == 'W')
-      {
-        lit[1].start = true;
-        guesses.append(1);
-      } else if (key == 'a' || key == 'A')
-      {
-        lit[2].start = true;
-        guesses.append(2);
-      } else if (key == 's' || key == 'S')
-      {
-        lit[3].start = true;
-        guesses.append(3);
-      }
-    }
-  }
 
   for (int i = 0; i < 4; i++)
-  {
     lit[i].Update(deltaTime);
-  }
 
   for (int i = 0; i < 4; i++)
-  {
-    if (lit[i].start)
-    {
-      states[i] = true;
-    } else
-      states[i] = false;
-  }
+    states[i] = lit[i].start;
 
   if (!turn && !pause)
     start(time_interval, level);
@@ -194,9 +150,8 @@ void fillNumbers(int[] numbers)
 void setState(boolean[] states, int index)
 {
   for (int i = 0; i < 4; i++)
-  {
     states[i] = false;
-  }
+    
   if (index == -1)
     return;
   states[index] = true;
@@ -266,7 +221,45 @@ void mousePressed() {
   }
 }
 
-void keyReleased()
-{
-  key_hold = false;
+void keyPressed() {
+  // Get the keycode of the pressed key
+  if (!keyPressedArray[keyCode]) {
+    keyPressedArray[keyCode] = true;
+
+    if (key == ' ')
+    {
+      windowTitle("Memory Game");
+      pause = false;
+    } else if (key == 'v')
+    {
+      for (int i = 0; i < 10; i++)
+        print(numbers[i] + " ");
+      print('\n');
+    }
+    if (turn && !wait_end_turn.start)
+    {
+      if (key == 'q' || key == 'Q')
+      {
+        lit[0].start = true;
+        guesses.append(0);
+      } else if (key == 'w' || key == 'W')
+      {
+        lit[1].start = true;
+        guesses.append(1);
+      } else if (key == 'a' || key == 'A')
+      {
+        lit[2].start = true;
+        guesses.append(2);
+      } else if (key == 's' || key == 'S')
+      {
+        lit[3].start = true;
+        guesses.append(3);
+      }
+    }
+  }
+}
+
+void keyReleased() {
+  // Get the keycode of the released key
+  keyPressedArray[keyCode] = false;
 }
