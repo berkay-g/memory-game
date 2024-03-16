@@ -1,5 +1,9 @@
 import processing.sound.*;
+import gifAnimation.*;
+
+Gif fireworks_gif;
 SoundFile[] music = new SoundFile[4];
+SoundFile lost;
 
 Wait wait_end_turn = new Wait(1.2f);
 Wait lit[] = new Wait[4];
@@ -20,7 +24,7 @@ boolean[] prev_states = { false, false, false, false };
 
 double count = 0;
 int idx = 0;
-int level = 0;
+int level = 9;
 
 boolean turn = false;
 boolean pause = true;
@@ -45,8 +49,13 @@ void setup() {
     lit[i] = new Wait(0.20f);
     music[i] = new SoundFile(this, "data/" + (i + 1) + ".wav");
   }
+  lost = new SoundFile(this, "data/error.wav");
 
   fillNumbers(numbers);
+  
+  fireworks_gif = new Gif(this, "data/fireworks.gif");
+  fireworks_gif.ignoreRepeat();
+
 }
 
 void draw() {
@@ -57,6 +66,15 @@ void draw() {
   update();
 
   background(#161616);
+  
+  if (lost.isPlaying())
+  {
+    fill(#FF0000);
+    circle(X, Y, SIZE + 3);
+    fill(#161616);
+    circle(X, Y, SIZE);
+  }
+  
   fill(255, 255, 0, states[0] ? 255 : 100);
   arc(X, Y, SIZE, SIZE, PI, PI + HALF_PI);
   fill(0, 0, 255, states[1] ? 255 : 100);
@@ -80,6 +98,26 @@ void draw() {
   text("Start", 70, 121);
   fill(overReset ? #ffffff : #c5c5c5);
   text("Reset", 67, 171);
+
+
+  if (overCircle(X, Y, SIZE / 2))
+  {
+    //fill(#282828);
+    //rect(X + 5, Y + 5, 15, 15, 3);
+    //rect(X - 20, Y + 5, 15, 15, 3);
+    //rect(X - 20, Y - 20, 15, 15, 3);
+    //rect(X + 5, Y - 20, 15, 15, 3);
+    
+    fill(199, 199, 222);
+    textFont(f, 12);
+    text("S", X + 8, Y + 17);
+    text("A", X - 17, Y + 17);
+    text("Q", X - 17, Y - 8);
+    text("W", X + 7, Y - 8);
+  }
+  
+  if (fireworks_gif.isPlaying())
+    image(fireworks_gif, 230, 60);
 }
 
 void update()
@@ -94,6 +132,7 @@ void update()
     {
       windowTitle("You Lost!");
       reset();
+      lost.play();
       break;
     }
 
@@ -129,6 +168,7 @@ void update()
   {
     windowTitle("You Won!");
     reset();
+    fireworks_gif.play();
   }
 
   for (int i = 0; i < 4; i++)
@@ -151,7 +191,7 @@ void setState(boolean[] states, int index)
 {
   for (int i = 0; i < 4; i++)
     states[i] = false;
-    
+
   if (index == -1)
     return;
   states[index] = true;
@@ -197,6 +237,14 @@ boolean overRect(int x, int y, int width, int height) {
   }
 }
 
+boolean overCircle(float x, float y, float radius)
+{
+  if (sqrt(sq(mouseX - x) + sq(mouseY - y)) <= radius)
+    return true;
+  else
+    return false;
+}
+
 void updateButtons()
 {
   if ( overRect(30, 100, 120, 30) ) {
@@ -236,6 +284,7 @@ void keyPressed() {
         print(numbers[i] + " ");
       print('\n');
     }
+
     if (turn && !wait_end_turn.start)
     {
       if (key == 'q' || key == 'Q')
