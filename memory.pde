@@ -24,7 +24,7 @@ boolean[] prev_states = { false, false, false, false };
 
 double count = 0;
 int idx = 0;
-int level = 9;
+int level = 0;
 
 boolean turn = false;
 boolean pause = true;
