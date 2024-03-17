@@ -244,7 +244,7 @@ boolean overCircle(float x, float y, float radius)
   return sqrt(sq(mouseX - x) + sq(mouseY - y)) <= radius;
 }
 
-void mousePressed() {
+void mouseClicked() {
   if (startButton.hovering) {
     windowTitle("Memory Game");
     pause = false;
