@@ -36,8 +36,10 @@ boolean[] keyPressedArray = new boolean[256]; // Array to store the state of eac
 int sound;
 boolean play = false;
 
-boolean overStart = false;
-boolean overReset = false;
+boolean hoveringStart = false;
+boolean clickedStart = false;
+boolean hoveringReset = false;
+boolean clickedReset = false;
 
 Wait victory_wait = new Wait(0.35f);
 int[] victory_song = { 0, 1, 2, 3, 2, 1, 0, 3, 2 };
@@ -105,10 +107,33 @@ void draw() {
   arc(X, Y, SIZE, SIZE, HALF_PI, PI);
   fill(0, 255, 0, states[3] ? 255 : 100);
   arc(X, Y, SIZE, SIZE, 0, HALF_PI);
-
-  fill(overStart ? #08aaf9 : #282828);
+  
+  if ((mousePressed && hoveringStart) || (keyPressed && key == ' '))
+    clickedStart = true;
+  else
+    clickedStart = false;  
+    
+  if (clickedStart)
+    fill(#0586c7);
+  else if (hoveringStart)
+    fill(#08aaf9);
+  else 
+    fill(#282828);
+  //fill(overStart ? #08aaf9 : #282828);
   rect(30, 100, 120, 30, 8);
-  fill(overReset ? #08aaf9 : #282828);
+  
+  if ((mousePressed && hoveringReset) || (keyPressed && (key == 'r' || key == 'R')))
+    clickedReset = true; 
+  else
+    clickedReset = false;  
+    
+  if (clickedReset)
+    fill(#0586c7);
+  else if (hoveringReset)
+    fill(#08aaf9);
+  else 
+    fill(#282828);
+  //fill(overReset ? #08aaf9 : #282828);
   rect(30, 150, 120, 30, 8);
 
   textFont(f, 20);
@@ -116,9 +141,9 @@ void draw() {
   text(level, 550, 40);
 
   textFont(f, 16);
-  fill(overStart ? #ffffff : #c5c5c5);
+  fill(hoveringStart || (keyPressed && key == ' ') ? #ffffff : #c5c5c5);
   text("Start", 70, 121);
-  fill(overReset ? #ffffff : #c5c5c5);
+  fill(hoveringReset || (keyPressed && (key == 'r' || key == 'R')) ? #ffffff : #c5c5c5);
   text("Reset", 67, 171);
 
 
@@ -271,22 +296,22 @@ boolean overCircle(float x, float y, float radius)
 void updateButtons()
 {
   if ( overRect(30, 100, 120, 30) ) {
-    overStart = true;
-    overReset = false;
+    hoveringStart = true;
+    hoveringReset = false;
   } else if ( overRect(30, 150, 120, 30) ) {
-    overReset = true;
-    overStart = false;
+    hoveringStart = false;
+    hoveringReset = true;
   } else {
-    overReset = overStart = false;
+    hoveringStart = hoveringReset = false;
   }
 }
 
 void mousePressed() {
-  if (overStart) {
+  if (hoveringStart) {
     windowTitle("Memory Game");
     pause = false;
   }
-  if (overReset) {
+  if (hoveringReset) {
     windowTitle("Memory Game");
     reset();
   }
@@ -301,7 +326,14 @@ void keyPressed() {
     {
       windowTitle("Memory Game");
       pause = false;
-    } else if (key == 'v')
+    }
+    else if (key == 'r' || key == 'R')
+    {
+      windowTitle("Memory Game");
+      reset();
+      print("reset");
+    }
+    else if (key == 'v')
     {
       for (int i = 0; i < 10; i++)
         print(numbers[i] + " ");
