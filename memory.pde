@@ -36,10 +36,7 @@ boolean[] keyPressedArray = new boolean[256]; // Array to store the state of eac
 int sound;
 boolean play = false;
 
-boolean hoveringStart = false;
-boolean clickedStart = false;
-boolean hoveringReset = false;
-boolean clickedReset = false;
+Button startButton, resetButton;
 
 Wait victory_wait = new Wait(0.35f);
 int[] victory_song = { 0, 1, 2, 3, 2, 1, 0, 3, 2 };
@@ -55,8 +52,7 @@ void victory()
     {
       victory_index = 0;
       victory_wait.start = false;
-    }
-    else
+    } else
       victory_wait.start = true;
   }
 }
@@ -74,23 +70,25 @@ void setup() {
   lost = new SoundFile(this, "data/error.wav");
 
   fillNumbers(numbers);
-  
+
   fireworks_gif = new Gif(this, "data/fireworks.gif");
   fireworks_gif.ignoreRepeat();
+
+  startButton = new Button(90, 115, 120, 30, 8, #282828, #08aaf9, #0586c7, "Start", #c5c5c5, #ffffff, ' ');
+  resetButton = new Button(90, 165, 120, 30, 8, #282828, #08aaf9, #0586c7, "Reset", #c5c5c5, #ffffff, 'r');
 }
 
 void draw() {
   frameRate(60);
   deltaTime = 1 / frameRate;
 
-  updateButtons();
   update();
-  
+
   if (victory_wait.start)
     victory();
 
   background(#161616);
-  
+
   if (lost.isPlaying())
   {
     fill(#FF0000);
@@ -98,7 +96,7 @@ void draw() {
     fill(#161616);
     circle(X, Y, SIZE);
   }
-  
+
   fill(255, 255, 0, states[0] ? 255 : 100);
   arc(X, Y, SIZE, SIZE, PI, PI + HALF_PI);
   fill(0, 0, 255, states[1] ? 255 : 100);
@@ -107,62 +105,27 @@ void draw() {
   arc(X, Y, SIZE, SIZE, HALF_PI, PI);
   fill(0, 255, 0, states[3] ? 255 : 100);
   arc(X, Y, SIZE, SIZE, 0, HALF_PI);
-  
-  if ((mousePressed && hoveringStart) || (keyPressed && key == ' '))
-    clickedStart = true;
-  else
-    clickedStart = false;  
-    
-  if (clickedStart)
-    fill(#0586c7);
-  else if (hoveringStart)
-    fill(#08aaf9);
-  else 
-    fill(#282828);
-  //fill(overStart ? #08aaf9 : #282828);
-  rect(30, 100, 120, 30, 8);
-  
-  if ((mousePressed && hoveringReset) || (keyPressed && (key == 'r' || key == 'R')))
-    clickedReset = true; 
-  else
-    clickedReset = false;  
-    
-  if (clickedReset)
-    fill(#0586c7);
-  else if (hoveringReset)
-    fill(#08aaf9);
-  else 
-    fill(#282828);
-  //fill(overReset ? #08aaf9 : #282828);
-  rect(30, 150, 120, 30, 8);
 
   textFont(f, 20);
   fill(255);
   text(level, 550, 40);
 
   textFont(f, 16);
-  fill(hoveringStart || (keyPressed && key == ' ') ? #ffffff : #c5c5c5);
-  text("Start", 70, 121);
-  fill(hoveringReset || (keyPressed && (key == 'r' || key == 'R')) ? #ffffff : #c5c5c5);
-  text("Reset", 67, 171);
-
+  startButton.update();
+  startButton.display();
+  resetButton.update();
+  resetButton.display();
 
   if (overCircle(X, Y, SIZE / 2))
   {
-    //fill(#282828);
-    //rect(X + 5, Y + 5, 15, 15, 3);
-    //rect(X - 20, Y + 5, 15, 15, 3);
-    //rect(X - 20, Y - 20, 15, 15, 3);
-    //rect(X + 5, Y - 20, 15, 15, 3);
-    
     fill(199, 199, 222);
     textFont(f, 12);
-    text("S", X + 8, Y + 17);
-    text("A", X - 17, Y + 17);
-    text("Q", X - 17, Y - 8);
-    text("W", X + 7, Y - 8);
+    text("S", X + 11, Y + 11);
+    text("A", X - 11, Y + 11);
+    text("Q", X - 11, Y - 11);
+    text("W", X + 11, Y - 11);
   }
-  
+
   if (fireworks_gif.isPlaying())
     image(fireworks_gif, 230, 60);
 }
@@ -276,42 +239,17 @@ void reset()
   guesses.clear();
 }
 
-boolean overRect(int x, int y, int width, int height) {
-  if (mouseX >= x && mouseX <= x+width &&
-    mouseY >= y && mouseY <= y+height) {
-    return true;
-  } else {
-    return false;
-  }
-}
-
 boolean overCircle(float x, float y, float radius)
 {
-  if (sqrt(sq(mouseX - x) + sq(mouseY - y)) <= radius)
-    return true;
-  else
-    return false;
-}
-
-void updateButtons()
-{
-  if ( overRect(30, 100, 120, 30) ) {
-    hoveringStart = true;
-    hoveringReset = false;
-  } else if ( overRect(30, 150, 120, 30) ) {
-    hoveringStart = false;
-    hoveringReset = true;
-  } else {
-    hoveringStart = hoveringReset = false;
-  }
+  return sqrt(sq(mouseX - x) + sq(mouseY - y)) <= radius;
 }
 
 void mousePressed() {
-  if (hoveringStart) {
+  if (startButton.hovering) {
     windowTitle("Memory Game");
     pause = false;
   }
-  if (hoveringReset) {
+  if (resetButton.hovering) {
     windowTitle("Memory Game");
     reset();
   }
@@ -326,14 +264,12 @@ void keyPressed() {
     {
       windowTitle("Memory Game");
       pause = false;
-    }
-    else if (key == 'r' || key == 'R')
+    } else if (key == 'r' || key == 'R')
     {
       windowTitle("Memory Game");
       reset();
       print("reset");
-    }
-    else if (key == 'v')
+    } else if (key == 'v')
     {
       for (int i = 0; i < 10; i++)
         print(numbers[i] + " ");
