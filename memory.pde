@@ -107,7 +107,7 @@ void draw() {
   arc(X, Y, SIZE, SIZE, 0, HALF_PI);
 
   textFont(f, 20);
-  fill(255);
+  fill(#c5c5c5);
   text(level, 550, 40);
 
   textFont(f, 16);
