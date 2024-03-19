@@ -1,12 +1,12 @@
 import processing.sound.*;
 import gifAnimation.*;
 
-Gif fireworks_gif;
-SoundFile[] music = new SoundFile[4];
-SoundFile lost;
+Gif fireworksGif;
+SoundFile[] notes = new SoundFile[4];
+SoundFile lostSound;
 
-Wait wait_end_turn = new Wait(1.2f);
-Wait lit[] = new Wait[4];
+Delay turnEndDelay = new Delay(1.2f);
+Delay lit[] = new Delay[4];
 
 int X = 360;
 int Y = 180;
@@ -20,7 +20,7 @@ int[] numbers = new int[10];
 IntList guesses = new IntList();
 
 boolean[] states = { false, false, false, false };
-boolean[] prev_states = { false, false, false, false };
+boolean[] prevStates = { false, false, false, false };
 
 double count = 0;
 int idx = 0;
@@ -29,67 +29,67 @@ int level = 0;
 boolean turn = false;
 boolean pause = true;
 
-double time_interval = 0.8;
+double timeInterval = 0.8;
 
 boolean[] keyPressedArray = new boolean[256]; // Array to store the state of each key
 
-int sound;
+int note;
 boolean play = false;
 
 Button startButton, resetButton;
 
-Wait victory_wait = new Wait(0.35f);
-int[] victory_song = { 0, 1, 2, 3, 2, 1, 0, 3, 2 };
-int victory_index = 0;
+Delay victorySongDelay = new Delay(0.35f);
+int[] victorySong = { 0, 1, 2, 3, 2, 1, 0, 3, 2 };
+int victorySongIndex = 0;
 void victory()
 {
-  setState(states, victory_song[victory_index]);
-  if (victory_wait.Update(deltaTime))
+  setState(states, victorySong[victorySongIndex]);
+  if (victorySongDelay.Update(deltaTime))
   {
-    victory_index++;
+    victorySongIndex++;
     setState(states, -1);
-    if (victory_index >= victory_song.length)
+    if (victorySongIndex >= victorySong.length)
     {
-      victory_index = 0;
-      victory_wait.start = false;
+      victorySongIndex = 0;
+      victorySongDelay.start = false;
     } else
-      victory_wait.start = true;
+      victorySongDelay.start = true;
   }
 }
 
 void setup() {
+  frameRate(60);
   size(640, 360);
   noStroke();
   f = createFont("Arial", 16, true);
 
   for (int i = 0; i < 4; i++)
   {
-    lit[i] = new Wait(0.20f);
-    music[i] = new SoundFile(this, "data/" + (i + 1) + ".wav");
+    lit[i] = new Delay(0.20f);
+    notes[i] = new SoundFile(this, "data/" + (i + 1) + ".wav");
   }
-  lost = new SoundFile(this, "data/error.wav");
+  lostSound = new SoundFile(this, "data/error.wav");
 
   fillNumbers(numbers);
 
-  fireworks_gif = new Gif(this, "data/fireworks.gif");
-  fireworks_gif.ignoreRepeat();
+  fireworksGif = new Gif(this, "data/fireworks.gif");
+  fireworksGif.ignoreRepeat();
 
   startButton = new Button(90, 115, 120, 30, 8, #282828, #08aaf9, #0586c7, "Start", #c5c5c5, #ffffff, ' ');
   resetButton = new Button(90, 165, 120, 30, 8, #282828, #08aaf9, #0586c7, "Reset", #c5c5c5, #ffffff, 'r');
 }
 
 void draw() {
-  frameRate(60);
   deltaTime = 1 / frameRate;
 
   update();
 
-  if (victory_wait.start)
+  if (victorySongDelay.start)
     victory();
 
   background(#161616);
 
-  if (lost.isPlaying())
+  if (lostSound.isPlaying())
   {
     fill(#FF0000);
     circle(X, Y, SIZE + 3);
@@ -126,14 +126,14 @@ void draw() {
     text("W", X + 11, Y - 11);
   }
 
-  if (fireworks_gif.isPlaying())
-    image(fireworks_gif, 230, 60);
+  if (fireworksGif.isPlaying())
+    image(fireworksGif, 230, 60);
 }
 
 void update()
 {
 
-  if (wait_end_turn.Update(deltaTime))
+  if (turnEndDelay.Update(deltaTime))
     turn = false;
 
   for (int i = 0; i < guesses.size(); i++)
@@ -142,34 +142,34 @@ void update()
     {
       windowTitle("You Lost!");
       reset();
-      lost.play();
+      lostSound.play();
       break;
     }
 
     if (i == level)
     {
       guesses.clear();
-      wait_end_turn.start = true;
+      turnEndDelay.start = true;
       setState(states, -1);
       level++;
-      time_interval -= 0.05;
+      timeInterval -= 0.05;
     }
   }
 
   for (int i = 0; i < 4; i++)
   {
-    if (states[i] && states[i] != prev_states[i])
+    if (states[i] && states[i] != prevStates[i])
     {
-      sound = i;
+      note = i;
       play = true;
-      prev_states[i] = states[i];
+      prevStates[i] = states[i];
     }
   }
   for (int i = 0; i < 4; i++)
-    prev_states[i] = states[i];
+    prevStates[i] = states[i];
   if (play)
   {
-    music[sound].play();
+    notes[note].play();
     play = false;
   }
 
@@ -178,8 +178,8 @@ void update()
   {
     windowTitle("You Won!");
     reset();
-    fireworks_gif.play();
-    victory_wait.start = true;
+    fireworksGif.play();
+    victorySongDelay.start = true;
   }
 
   for (int i = 0; i < 4; i++)
@@ -189,7 +189,7 @@ void update()
     states[i] = lit[i].start;
 
   if (!turn && !pause)
-    start(time_interval, level);
+    start(timeInterval, level);
 }
 
 void fillNumbers(int[] numbers)
@@ -209,13 +209,13 @@ void setState(boolean[] states, int index)
 }
 
 
-void start(double time_interval, int level)
+void start(double timeInterval, int level)
 {
   setState(states, numbers[idx]);
   count += deltaTime;
-  if (count >= time_interval)
+  if (count >= timeInterval)
   {
-    count -= time_interval;
+    count -= timeInterval;
     idx++;
     setState(states, -1);
     if (idx > level)
@@ -233,7 +233,7 @@ void reset()
   count = 0;
   idx = 0;
   turn = false;
-  time_interval = 0.8;
+  timeInterval = 0.8;
   level = 0;
   fillNumbers(numbers);
   guesses.clear();
@@ -244,7 +244,7 @@ boolean overCircle(float x, float y, float radius)
   return sqrt(sq(mouseX - x) + sq(mouseY - y)) <= radius;
 }
 
-void mouseClicked() {
+void mousePressed() {
   if (startButton.hovering) {
     windowTitle("Memory Game");
     pause = false;
@@ -276,7 +276,7 @@ void keyPressed() {
       print('\n');
     }
 
-    if (turn && !wait_end_turn.start)
+    if (turn && !turnEndDelay.start)
     {
       if (key == 'q' || key == 'Q')
       {
