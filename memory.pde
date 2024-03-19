@@ -3,7 +3,7 @@ import gifAnimation.*;
 
 Gif fireworksGif;
 SoundFile[] notes = new SoundFile[4];
-SoundFile lostSound;
+SoundFile losingSound;
 
 Delay turnEndDelay = new Delay(1.2f);
 Delay lit[] = new Delay[4];
@@ -24,7 +24,7 @@ boolean[] prevStates = { false, false, false, false };
 
 double count = 0;
 int idx = 0;
-int level = 10;
+int level = 0;
 
 boolean turn = false;
 boolean pause = true;
@@ -68,7 +68,7 @@ void setup() {
     lit[i] = new Delay(0.20f);
     notes[i] = new SoundFile(this, "data/" + (i + 1) + ".wav");
   }
-  lostSound = new SoundFile(this, "data/error.wav");
+  losingSound = new SoundFile(this, "data/error.wav");
 
   fillNumbers(numbers);
 
@@ -89,7 +89,7 @@ void draw() {
 
   background(#161616);
 
-  if (lostSound.isPlaying())
+  if (losingSound.isPlaying())
   {
     fill(#FF0000);
     circle(X, Y, SIZE + 3);
@@ -142,7 +142,7 @@ void update()
     {
       windowTitle("You Lost!");
       reset();
-      lostSound.play();
+      losingSound.play();
       break;
     }
 
