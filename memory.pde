@@ -24,7 +24,7 @@ boolean[] prevStates = { false, false, false, false };
 
 double count = 0;
 int idx = 0;
-int level = 0;
+int level = 10;
 
 boolean turn = false;
 boolean pause = true;
@@ -38,22 +38,22 @@ boolean play = false;
 
 Button startButton, resetButton;
 
-Delay victorySongDelay = new Delay(0.35f);
-int[] victorySong = { 0, 1, 2, 3, 2, 1, 0, 3, 2 };
-int victorySongIndex = 0;
+Delay victoryMusicDelay = new Delay(0.35f);
+int[] victoryMusic = { 0, 1, 2, 3, 2, 1, 0, 3, 2 };
+int victoryMusicIndex = 0;
 void victory()
 {
-  setState(states, victorySong[victorySongIndex]);
-  if (victorySongDelay.Update(deltaTime))
+  setState(states, victoryMusic[victoryMusicIndex]);
+  if (victoryMusicDelay.Update(deltaTime))
   {
-    victorySongIndex++;
+    victoryMusicIndex++;
     setState(states, -1);
-    if (victorySongIndex >= victorySong.length)
+    if (victoryMusicIndex >= victoryMusic.length)
     {
-      victorySongIndex = 0;
-      victorySongDelay.start = false;
+      victoryMusicIndex = 0;
+      victoryMusicDelay.start = false;
     } else
-      victorySongDelay.start = true;
+      victoryMusicDelay.start = true;
   }
 }
 
@@ -84,7 +84,7 @@ void draw() {
 
   update();
 
-  if (victorySongDelay.start)
+  if (victoryMusicDelay.start)
     victory();
 
   background(#161616);
@@ -179,7 +179,7 @@ void update()
     windowTitle("You Won!");
     reset();
     fireworksGif.play();
-    victorySongDelay.start = true;
+    victoryMusicDelay.start = true;
   }
 
   for (int i = 0; i < 4; i++)
